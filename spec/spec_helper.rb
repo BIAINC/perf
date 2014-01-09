@@ -10,3 +10,10 @@ def stub_storage(*methods)
   Perf::Configuration.stub(:storage).and_return(s)
   s
 end
+
+RSpec::Matchers.define :be_a_counter do
+  match do |actual|
+    methods = actual.instance_methods
+    methods.include?(:start) && methods.include?(:stop) && methods.include?(:error)
+  end
+end

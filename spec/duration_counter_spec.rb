@@ -7,12 +7,10 @@ describe Perf::DurationCounter do
     Perf::Configuration.stub(:storage).and_return(storage)
   end
 
-  context 'counter' do
-    subject { Perf::DurationCounter.instance_methods }
+  context 'interface' do
+    subject { Perf::DurationCounter }
 
-    it {should include(:start) }
-    it {should include(:stop) }
-    it {should include(:error) }
+    it { should be_a_counter }
   end
 
   context '#start' do

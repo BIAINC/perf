@@ -10,12 +10,9 @@ describe Perf::TotalsCounter do
     c
   end
 
-  context 'counter' do
-    subject { type.instance_methods }
-
-    it {should include(:start)}
-    it {should include(:stop)}
-    it {should include(:error)}
+  context 'interface' do
+    subject { Perf::TotalsCounter }
+    it { should be_a_counter }
   end
 
   context '#start' do

@@ -10,14 +10,12 @@ describe Perf::FailuresCounter do
     counter
   end
 
-  context 'counter' do
-    subject { type.instance_methods }
+  context 'interface' do
+    subject { Perf::FailuresCounter }
 
-    it {should include(:start)}
-    it {should include(:stop)}
-    it {should include(:error)}
+    it {should be_a_counter }
   end
-
+  
   context '#start' do
     let(:counter) { type.new(increments) }
 

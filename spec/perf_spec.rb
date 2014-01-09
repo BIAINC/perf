@@ -141,4 +141,15 @@ describe Perf do
       duration(:foo).should be_kind_of(Perf::DurationCounter)
     end
   end
+
+  context 'throughput' do
+    it 'should instantiate a throughput counter' do
+      Perf::ThroughputCounter.should_receive(:new).with(foo: 123, bar: 456).and_call_original
+      throughput(foo: 123, bar: 456)
+    end
+
+    it 'should return a throughput counter' do
+      throughput(foo: 123).should be_a(Perf::ThroughputCounter)
+    end
+  end
 end

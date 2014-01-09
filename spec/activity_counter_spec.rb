@@ -18,12 +18,10 @@ describe Perf::ActivityCounter do
     c
   end
 
-  context 'counter' do
-    subject { type.instance_methods }
+  context 'interface' do
+    subject { Perf::ActivityCounter}
 
-    it { should include(:start) }
-    it { should include(:stop) }
-    it { should include(:error)}
+    it { should be_a_counter }
   end
 
   context '#start' do
