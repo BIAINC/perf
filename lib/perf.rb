@@ -1,6 +1,7 @@
 require "perf/version"
 require_relative "perf/configuration"
 require_relative "perf/activity_counter"
+require_relative "perf/duration_counter"
 require_relative "perf/failures_counter"
 require_relative "perf/hits_counter"
 require_relative "perf/totals_counter"
@@ -39,6 +40,10 @@ module Perf
 
   def failures(*counters)
     FailuresCounter.new(get_increments(counters))
+  end
+
+  def duration(counter)
+    DurationCounter.new(counter)
   end
 
   private

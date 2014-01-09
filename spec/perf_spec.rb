@@ -130,4 +130,15 @@ describe Perf do
       failures(:foo, bar: 10)
     end
   end
+
+  context 'duration' do
+    it 'should instantiate a duration counter' do
+      Perf::DurationCounter.should_receive(:new).with(:foo).and_call_original
+      duration(:foo)
+    end
+
+    it 'should return duration counter' do
+      duration(:foo).should be_kind_of(Perf::DurationCounter)
+    end
+  end
 end

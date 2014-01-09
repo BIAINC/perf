@@ -35,7 +35,9 @@ end
 Perf module provides the following counters out of the box:
 * <i>hits</i>      increments values before executing the code block. 
 * <i>totals</i>    increments values upon successful execution (i.e. no exceptions) of the code block.
-* <i>activity</i>  increments values before the code block, and decrements afterwards. 
+* <i>activity</i>  increments values before the code block, and decrements afterwards.
+* <i>failures</i>  increments values when the code block throws an exception.
+* <i>duration</i>  records duration of the code block (in seconds) upon successful execution by incrementing specified value.
 
 A call to <i>collect</i> may include any number of counters:
 ```ruby
@@ -87,6 +89,20 @@ collect activity(:active_uploads, active_upload_size: file.size) do
 end
 ```
 Unlike <i>hits</i> and <i>totals</i>, <i>activity</i> is a volatile counter. If a process executing the code block crashes, or if the mahcine looses connectivity, pending activity counters will eventually fix themselves. The time-to-live period is implementation-specific.
+#### Failures
+Failures counter reports errors. The values get incremented only if the code block throws an exception. 
+```ruby
+collect failures(:failed_upload_count) do
+  # upload a file
+end
+```
+#### Duration
+Duration counter records duration of the code block (in seconds). Only successful execution counts - if the block throws, nothing gets reported.
+```ruby
+collect duration(:total_upload_time) do
+  # upload a file
+end
+```
 ### Retrieving data
 Current values of all counters can be obtained by calling Perf::Data.get method, which returns a hash table with counters and their values:
 ```ruby
