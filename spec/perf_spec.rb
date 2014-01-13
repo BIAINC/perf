@@ -5,9 +5,9 @@ describe Perf do
 
   def new_mock_counter
     counter = double('fake counter')
-    counter.stub!(:start)
-    counter.stub!(:stop)
-    counter.stub!(:error)
+    counter.stub(:start)
+    counter.stub(:stop)
+    counter.stub(:error)
     counter
   end
 
