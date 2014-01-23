@@ -27,18 +27,39 @@ describe Perf::ThroughputCounter do
 
   context '#stop' do
     let(:counter_name) { :throughput }
-    let(:volume) { rand(100..1000) }
-    let(:counter) { Perf::ThroughputCounter.new(counter_name => volume)}
 
     before(:each) do
       Time.stub(:now).and_return(110, 120)
-      counter.start
     end
 
-    it 'should increment counters' do
-      storage.should_receive(:increment).with("#{counter_name}.duration" => 10, "#{counter_name}.volume" => volume)
+    context 'normal counter' do
+      let(:volume) { rand(100..1000) }
+      let(:counter) { Perf::ThroughputCounter.new(counter_name => volume)}
 
-      counter.stop
+      before(:each) do
+        counter.start
+      end
+
+      it 'should increment counters' do
+        storage.should_receive(:increment).with("#{counter_name}.duration" => 10, "#{counter_name}.volume" => volume)
+
+        counter.stop
+      end
+    end
+
+    context 'lambda counter' do
+      let(:volume) { -> { 123 } }
+      let(:counter) { Perf::ThroughputCounter.new(counter_name => volume) }
+
+      before(:each) do
+        counter.start
+      end
+
+      it 'should increment counters' do
+        storage.should_receive(:increment).with("#{counter_name}.duration" => 10, "#{counter_name}.volume" => volume.call)
+
+        counter.stop
+      end
     end
   end
 

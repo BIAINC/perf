@@ -2,7 +2,8 @@ require 'spec_helper'
 
 describe Perf::TotalsCounter do 
   let(:type) { Perf::TotalsCounter }
-  let(:increments) {{foo: 1, bar:2}}
+  let(:increments) {{foo: 1, bar:2, lambda: ->{3}}}
+  let(:translated_increments) { {foo: 1, bar: 2, lambda: 3} }
 
   def active_counter
     c = type.new(increments)
@@ -35,7 +36,7 @@ describe Perf::TotalsCounter do
       counter = active_counter
       storage  = stub_storage
 
-      storage.should_receive(:increment).with(increments).exactly(1).times
+      storage.should_receive(:increment).with(translated_increments).exactly(1).times
 
       counter.stop
     end

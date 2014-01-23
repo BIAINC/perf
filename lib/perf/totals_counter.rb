@@ -1,5 +1,9 @@
+require_relative 'hash_processor'
+
 module Perf
   class TotalsCounter
+    include HashProcessor
+
     def initialize(increments)
       @increments = increments
     end
@@ -9,7 +13,7 @@ module Perf
     end
 
     def stop
-      Configuration.storage.increment(@increments)
+      Configuration.storage.increment(process_hash(@increments))
     end
 
     def error

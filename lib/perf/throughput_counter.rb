@@ -1,5 +1,9 @@
+require_relative 'hash_processor'
+
 module Perf
   class ThroughputCounter
+    include HashProcessor
+
     def initialize(increments)
       @increments = increments
     end
@@ -15,7 +19,7 @@ module Perf
         increments["#{c}.duration"] = duration
         increments["#{c}.volume"] = v
       end
-      Perf::Configuration.storage.increment(increments)
+      Perf::Configuration.storage.increment(process_hash(increments))
     end
 
     def error

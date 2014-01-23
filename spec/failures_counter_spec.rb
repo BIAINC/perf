@@ -53,5 +53,13 @@ describe Perf::FailuresCounter do
 
       counter.error
     end
+
+    it 'should execute lambdas' do
+      c = Perf::FailuresCounter.new({foo: 1, bar: ->{2}})
+      c.start
+      Perf::Configuration.storage.should_receive(:increment).with(foo: 1, bar: 2).exactly(1).times
+
+      c.error
+    end
   end
 end
