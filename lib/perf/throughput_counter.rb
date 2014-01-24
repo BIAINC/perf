@@ -16,8 +16,8 @@ module Perf
       duration = (Time.now - @start_time).round
       increments = {}
       @increments.each do |c, v|
-        increments["#{c}.duration"] = duration
-        increments["#{c}.volume"] = v
+        increments["#{c}_duration"] = duration
+        increments["#{c}_volume"] = v
       end
       Perf::Configuration.storage.increment(process_hash(increments))
     end
