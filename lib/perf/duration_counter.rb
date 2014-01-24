@@ -9,8 +9,8 @@ module Perf
     end
 
     def stop
-      seconds = (Time.now - @start_time).round
-      Configuration.storage.increment(@name => seconds)
+      ms = ((Time.now - @start_time) * 1000).round
+      Configuration.storage.increment(@name => ms)
     end
 
     def error

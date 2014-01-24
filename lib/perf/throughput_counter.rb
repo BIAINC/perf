@@ -13,7 +13,7 @@ module Perf
     end
 
     def stop
-      duration = (Time.now - @start_time).round
+      duration = ((Time.now - @start_time) * 1000).round
       increments = {}
       @increments.each do |c, v|
         increments["#{c}_duration"] = duration

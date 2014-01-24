@@ -41,7 +41,7 @@ describe Perf::ThroughputCounter do
       end
 
       it 'should increment counters' do
-        storage.should_receive(:increment).with("#{counter_name}_duration" => 10, "#{counter_name}_volume" => volume)
+        storage.should_receive(:increment).with("#{counter_name}_duration" => 10000, "#{counter_name}_volume" => volume)
 
         counter.stop
       end
@@ -56,7 +56,7 @@ describe Perf::ThroughputCounter do
       end
 
       it 'should increment counters' do
-        storage.should_receive(:increment).with("#{counter_name}_duration" => 10, "#{counter_name}_volume" => volume.call)
+        storage.should_receive(:increment).with("#{counter_name}_duration" => 10000, "#{counter_name}_volume" => volume.call)
 
         counter.stop
       end

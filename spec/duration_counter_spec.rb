@@ -34,7 +34,7 @@ describe Perf::DurationCounter do
     end
 
     it 'should report duration to the storage' do
-      storage.should_receive(:increment).with(counter_name => 10)
+      storage.should_receive(:increment).with(counter_name => 10000)
 
       counter.stop
     end
