@@ -23,8 +23,6 @@ describe Perf::Storage::RedisStorage do
     it { should include(:volatile_key_ttl)}
   end
 
-  context '#volatile_key'
-
   context '#increment' do
     it 'should register the counter' do
       redis.should_receive(:hincrby).with(type::PERSISTENT_COUNTERS_KEY, :counter, 123)
@@ -167,10 +165,16 @@ describe Perf::Storage::RedisStorage do
   end
 
   context '#reset' do
-    it 'should reset regular counters' do
-      redis.should_receive(:del).with(type::PERSISTENT_COUNTERS_KEY)
+    it 'should delete keys from redis' do
+      redis.should_receive(:del).exactly(1).times
 
       storage.reset
+    end
+
+    it 'should delete all redis data' do
+      redis.stub(:del) do |*args|
+        [type::PERSISTENT_COUNTERS_KEY, type::VOLATILE_COUNTERS_SET].sort.should eql(args.sort)
+      end
     end
   end
 end

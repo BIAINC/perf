@@ -72,7 +72,7 @@ module Perf
       end
 
       def reset
-        redis.del(PERSISTENT_COUNTERS_KEY)
+        redis.del(PERSISTENT_COUNTERS_KEY, VOLATILE_KEYS_SET)
       end
 
       private
