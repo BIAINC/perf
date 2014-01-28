@@ -173,7 +173,7 @@ describe Perf::Storage::RedisStorage do
 
     it 'should delete all redis data' do
       redis.stub(:del) do |*args|
-        [type::PERSISTENT_COUNTERS_KEY, type::VOLATILE_KEYS_SET].sort.should eql(args.sort)
+        [type::PERSISTENT_COUNTERS_KEY, type::VOLATILE_KEYS_SET, type::VOLATILE_COUNTERS_SET].sort.should eql(args.sort)
       end
 
       storage.reset
