@@ -53,22 +53,20 @@ module Perf
       end
 
       def all_counters
-        counters = redis.hgetall(PERSISTENT_COUNTERS_KEY)
-        counters.each{|k, v| counters[k] = v.to_i}
-
-        containers = redis.smembers(VOLATILE_KEYS_SET)
-
-        redis.smembers(VOLATILE_COUNTERS_SET).each do |counter|
-          sum = 0
-
-          containers.each do |container|
-            sum += redis.hget(container, counter).to_i
-          end
-
-          counters[counter] = sum
+        persistent_data, volatile_counters, volatile_sets = redis.multi do |redis|
+          redis.hgetall(PERSISTENT_COUNTERS_KEY)
+          redis.smembers(VOLATILE_COUNTERS_SET)
+          redis.smembers(VOLATILE_KEYS_SET)
         end
 
-        counters
+        all_volatile_data = redis.multi do |redis|
+          volatile_sets.each{|s| redis.hgetall(s) }
+        end
+
+        volatile_data = volatile_counters.inject({}){|h, c| h[c] = all_volatile_data.inject(0){|v, s| v += s[c].to_i}; h}
+
+        counters = persistent_data.inject({}){|h, (c, v)| h[c] = v.to_i; h}
+        counters.merge(volatile_data)
       end
 
       def reset
