@@ -1,6 +1,7 @@
 require 'spec_helper'
 require './lib/perf/storage/redis_storage.rb'
-require 'mock_redis'
+require 'redis'
+# require 'mock_redis'
 
 describe Perf::Storage::RedisStorage do
   let(:type) { Perf::Storage::RedisStorage }
@@ -8,8 +9,8 @@ describe Perf::Storage::RedisStorage do
   let(:storage) { type.new(redis) }
 
   def mock_redis
-    r = MockRedis.new
-    r.stub(:multi).and_yield(r)
+    r = Redis.new
+    r.flushdb
     r
   end
 
