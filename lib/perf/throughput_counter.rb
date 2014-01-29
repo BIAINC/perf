@@ -16,6 +16,7 @@ module Perf
       duration = ((Time.now - @start_time) * 1000).round
       increments = {}
       @increments.each do |c, v|
+        increments["#{c}_count"] = 1
         increments["#{c}_duration"] = duration
         increments["#{c}_volume"] = v
       end
