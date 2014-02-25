@@ -9,6 +9,7 @@ module Perf
 
       attr_reader(:redis)
       attr_writer(:volatile_key_ttl)
+      attr_accessor(:thread_safe)
 
       def initialize(redis)
         @redis = redis
@@ -19,7 +20,7 @@ module Perf
       end
 
       def increment(deltas)
-        with_redis(deltas.size) do |redis|
+        with_redis(deltas.size > 1) do |redis|
           deltas.each do |counter, delta|
             redis.hincrby(PERSISTENT_COUNTERS_KEY, counter, delta)
           end
@@ -27,7 +28,7 @@ module Perf
       end
 
       def increment_volatile(deltas)
-        redis.multi do |redis|
+        with_redis(true) do |redis|
           deltas.each do |counter, delta|
             redis.sadd(VOLATILE_COUNTERS_SET, counter)
             redis.sadd(VOLATILE_KEYS_SET, volatile_key)
@@ -40,7 +41,7 @@ module Perf
       end
 
       def decrement_volatile(deltas)
-        redis.multi do |redis|
+        with_redis(true) do |redis|
           deltas.each do |counter, delta|
             redis.hincrby(volatile_key, counter, -delta)
           end
@@ -53,6 +54,7 @@ module Perf
       end
 
       def all_counters
+        # No need to lock here - the method may return inconsistent data anyway.
         persistent_data, volatile_counters, volatile_sets = redis.multi do |redis|
           redis.hgetall(PERSISTENT_COUNTERS_KEY)
           redis.smembers(VOLATILE_COUNTERS_SET)
@@ -75,11 +77,21 @@ module Perf
 
       private
 
-      def with_redis(instructions_count, &block)
-        if (instructions_count > 1)
-          redis.multi(&block)
+      def with_redis(transactional, &block)
+        with_lock do
+          if (transactional)
+            redis.multi(&block)
+          else
+            block[redis]
+          end
+        end
+      end
+
+      def with_lock(&block)
+        if (thread_safe)
+          Thread.exclusive(&block)
         else
-          block[redis]
+          block.call
         end
       end
     end

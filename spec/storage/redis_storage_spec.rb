@@ -22,6 +22,10 @@ describe Perf::Storage::RedisStorage do
     it { should include(:decrement_volatile) }
     it { should include(:volatile_key) }
     it { should include(:volatile_key_ttl)}
+
+    it 'should not be thread-safe by default' do
+      storage.thread_safe.should be_false
+    end
   end
 
   context '#increment' do
@@ -43,6 +47,18 @@ describe Perf::Storage::RedisStorage do
       redis.should_receive(:hincrby).ordered.with(type::PERSISTENT_COUNTERS_KEY, :counter2, 2)
 
       storage.increment(counter1: 1, counter2: 2)
+    end
+
+    context 'thread safe' do
+      before(:each) do
+        storage.stub(:thread_safe).and_return(true)
+      end
+
+      it 'should acquire exclusive access' do
+        Thread.should_receive(:exclusive).and_yield
+
+        storage.increment(counter1: 1, counter2: 2)
+      end
     end
   end
 
@@ -82,6 +98,18 @@ describe Perf::Storage::RedisStorage do
 
       storage.increment_volatile(counter: 123)
     end
+
+    context 'thread safe' do
+      before(:each) do
+        storage.stub(:thread_safe).and_return(true)
+      end
+
+      it 'should acquire exclusive access' do
+        Thread.should_receive(:exclusive).and_yield
+
+        storage.increment_volatile(counter: 123)
+      end
+    end
   end
 
   context '#decrement_volatile' do
@@ -103,6 +131,18 @@ describe Perf::Storage::RedisStorage do
       redis.should_receive(:expire).ordered
 
       storage.decrement_volatile(counter: 123)
+    end
+
+    context 'thread safe' do
+      before(:each) do
+        storage.stub(:thread_safe).and_return(true)
+      end
+
+      it 'should acquire exclusive access' do
+        Thread.should_receive(:exclusive).and_yield
+
+        storage.decrement_volatile(counter: 123)
+      end
     end
   end
 
