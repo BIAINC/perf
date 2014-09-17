@@ -2,9 +2,12 @@ module Perf
   module Storage
     # In-memory storage for perf counters. Great for a single-process systems.
     class MemoryStorage
-      def initialize(counters = {})
+      def self.new_storage_hash
+        Hash.new.with_indifferent_access.tap{|h| h.default = 0}
+      end
+
+      def initialize(counters = MemoryStorage.new_storage_hash)
         @counters = counters
-        @counters.default = 0
       end
 
       def increment(deltas)
@@ -24,7 +27,7 @@ module Perf
       end
 
       def all_counters
-        @counters.dup.freeze
+        @counters.dup.tap{|h| h.default = 0}
       end
 
       def reset

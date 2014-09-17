@@ -1,4 +1,5 @@
 require "perf/version"
+require "active_support/core_ext/hash"
 require_relative "perf/configuration"
 require_relative "perf/activity_counter"
 require_relative "perf/duration_counter"
