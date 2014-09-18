@@ -68,7 +68,7 @@ module Perf
         volatile_data = volatile_counters.inject({}){|h, c| h[c] = all_volatile_data.inject(0){|v, s| v += s[c].to_i}; h}
 
         counters = persistent_data.inject({}){|h, (c, v)| h[c] = v.to_i; h}
-        counters.merge(volatile_data)
+        counters.merge(volatile_data).with_indifferent_access.tap{|h| h.default = 0}
       end
 
       def reset
