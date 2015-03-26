@@ -19,7 +19,7 @@ describe Perf do
       collect counter do
         called = true
       end
-      called.should be_true
+      called.should eq true
     end
 
     it 'should not fail without a code block' do
