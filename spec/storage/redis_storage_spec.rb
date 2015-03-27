@@ -24,7 +24,7 @@ describe Perf::Storage::RedisStorage do
     it { should include(:volatile_key_ttl)}
 
     it 'should not be thread-safe by default' do
-      storage.thread_safe.should be_false
+      (!!storage.thread_safe).should eq false
     end
   end
 
@@ -113,6 +113,10 @@ describe Perf::Storage::RedisStorage do
   end
 
   context '#decrement_volatile' do
+    before(:each) do
+      storage.increment_volatile(counter: 123)
+    end
+
     it 'should decrement redis value' do
       redis.should_receive(:hincrby).with(storage.volatile_key, :counter, -123)
 
@@ -127,8 +131,21 @@ describe Perf::Storage::RedisStorage do
 
     it 'should update redis in a single call' do
       redis.should_receive(:multi).ordered.and_yield(redis)
-      redis.should_receive(:hincrby).ordered
       redis.should_receive(:expire).ordered
+      redis.should_receive(:hincrby).ordered
+
+      storage.decrement_volatile(counter: 123)
+    end
+
+    it 'should not delete the key' do
+      redis.should_not_receive(:del)
+
+      storage.decrement_volatile(counter: 123)
+    end
+
+    it 'deletes the key' do
+      redis.del(storage.volatile_key)
+      redis.should_receive(:del).once
 
       storage.decrement_volatile(counter: 123)
     end

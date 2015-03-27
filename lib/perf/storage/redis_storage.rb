@@ -41,11 +41,18 @@ module Perf
       end
 
       def decrement_volatile(deltas)
-        with_redis(true) do |redis|
-          deltas.each do |counter, delta|
-            redis.hincrby(volatile_key, counter, -delta)
+        with_lock do
+          results = redis.multi do |redis|
+            redis.expire(volatile_key, volatile_key_ttl)
+            deltas.each do |counter, delta|
+              redis.hincrby(volatile_key, counter, -delta)
+            end
           end
-          redis.expire(volatile_key, volatile_key_ttl)
+
+          unless (results.first)
+            # The key was not there; get rid of it
+            redis.del(volatile_key)
+          end
         end
       end
 
