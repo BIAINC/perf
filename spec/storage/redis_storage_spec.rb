@@ -1,7 +1,6 @@
 require 'spec_helper'
 require './lib/perf/storage/redis_storage.rb'
 require 'redis'
-# require 'mock_redis'
 
 describe Perf::Storage::RedisStorage do
   let(:type) { Perf::Storage::RedisStorage }
@@ -9,9 +8,13 @@ describe Perf::Storage::RedisStorage do
   let(:storage) { type.new(redis) }
 
   def mock_redis
-    r = Redis.new
-    r.flushdb
-    r
+    Redis.new.tap{|r|
+      r.flushdb
+    }
+  end
+
+  def expect_synchronize
+    described_class.mutex.should_receive(:synchronize)
   end
 
   context 'storage' do
@@ -55,8 +58,7 @@ describe Perf::Storage::RedisStorage do
       end
 
       it 'should acquire exclusive access' do
-        Thread.should_receive(:exclusive).and_yield
-
+        expect_synchronize
         storage.increment(counter1: 1, counter2: 2)
       end
     end
@@ -105,7 +107,7 @@ describe Perf::Storage::RedisStorage do
       end
 
       it 'should acquire exclusive access' do
-        Thread.should_receive(:exclusive).and_yield
+        expect_synchronize
 
         storage.increment_volatile(counter: 123)
       end
@@ -156,7 +158,7 @@ describe Perf::Storage::RedisStorage do
       end
 
       it 'should acquire exclusive access' do
-        Thread.should_receive(:exclusive).and_yield
+        expect_synchronize
 
         storage.decrement_volatile(counter: 123)
       end

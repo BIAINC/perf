@@ -6,6 +6,8 @@ module Perf
       VOLATILE_COUNTERS_SET = 'perf:volatile'           # All known volatile counters
       VOLATILE_KEYS_SET = 'perf:volatile_sets'          # All known volatile keys
       DEFAULT_VOLATILE_KEY_TTL = 30 * 60                # Number of seconds volatile keys live
+      VOLATILE_KEY = "perf:volatile:#{Socket.gethostname}:#{Process.pid}"
+      @@mutex = Mutex.new
 
       attr_reader(:redis)
       attr_writer(:volatile_key_ttl)
@@ -31,33 +33,33 @@ module Perf
         with_redis(true) do |redis|
           deltas.each do |counter, delta|
             redis.sadd(VOLATILE_COUNTERS_SET, counter)
-            redis.sadd(VOLATILE_KEYS_SET, volatile_key)
+            redis.sadd(VOLATILE_KEYS_SET, VOLATILE_KEY)
 
-            redis.hincrby(volatile_key, counter, delta)
+            redis.hincrby(VOLATILE_KEY, counter, delta)
           end
 
-          redis.expire(volatile_key, volatile_key_ttl)
+          redis.expire(VOLATILE_KEY, volatile_key_ttl)
         end
       end
 
       def decrement_volatile(deltas)
         with_lock do
           results = redis.multi do |redis|
-            redis.expire(volatile_key, volatile_key_ttl)
+            redis.expire(VOLATILE_KEY, volatile_key_ttl)
             deltas.each do |counter, delta|
-              redis.hincrby(volatile_key, counter, -delta)
+              redis.hincrby(VOLATILE_KEY, counter, -delta)
             end
           end
 
           unless (results.first)
             # The key was not there; get rid of it
-            redis.del(volatile_key)
+            redis.del(VOLATILE_KEY)
           end
         end
       end
 
       def volatile_key
-        @volatile_key ||= "perf:volatile:#{Socket.gethostname}:#{Process.pid}"
+        VOLATILE_KEY
       end
 
       def all_counters
@@ -82,6 +84,10 @@ module Perf
         redis.del(PERSISTENT_COUNTERS_KEY, VOLATILE_KEYS_SET, VOLATILE_COUNTERS_SET)
       end
 
+      def self.mutex
+        @@mutex
+      end
+
       private
 
       def with_redis(transactional, &block)
@@ -96,7 +102,7 @@ module Perf
 
       def with_lock(&block)
         if (thread_safe)
-          Thread.exclusive(&block)
+          @@mutex.synchronize(&block)
         else
           block.call
         end
