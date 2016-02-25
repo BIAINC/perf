@@ -8,13 +8,13 @@ describe Perf::Storage::RedisStorage do
   let(:storage) { type.new(redis) }
 
   def mock_redis
-    Redis.new.tap{|r|
-      r.flushdb
-    }
+    r = Redis.new
+    r.flushdb
+    r
   end
 
   def expect_synchronize
-    described_class.mutex.should_receive(:synchronize)
+    described_class.mutex.should_receive(:synchronize).and_yield
   end
 
   context 'storage' do
