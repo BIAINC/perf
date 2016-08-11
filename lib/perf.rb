@@ -1,13 +1,16 @@
 require "perf/version"
 require "active_support/core_ext/hash"
-require_relative "perf/configuration"
-require_relative "perf/activity_counter"
-require_relative "perf/duration_counter"
-require_relative "perf/failures_counter"
-require_relative "perf/hits_counter"
-require_relative "perf/throughput_counter"
-require_relative "perf/totals_counter"
-require_relative "perf/data"
+
+require "perf/configuration"
+require "perf/storage/memory_storage"
+require "perf/storage/redis_storage"
+require "perf/activity_counter"
+require "perf/duration_counter"
+require "perf/failures_counter"
+require "perf/hits_counter"
+require "perf/throughput_counter"
+require "perf/totals_counter"
+require "perf/data"
 
 
 module Perf

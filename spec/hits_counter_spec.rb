@@ -1,40 +1,40 @@
 require 'spec_helper'
 
 describe Perf::HitsCounter do
-  let(:type) { Perf::HitsCounter }
   let(:increments) { {foo: 1, bar: 2} }
 
   def active_counter
-    c = type.new(increments)
+    c = described_class.new(increments)
     c.start
     c
   end
 
-  context 'interface' do
+  describe 'interface' do
     subject { Perf::HitsCounter }
 
-    it {should be_a_counter }
+    it {is_expected.to be_a_counter }
   end
 
-  context '#start' do
-    let(:counter) { type.new(increments) }
+  describe '#start' do
+    let(:counter) { described_class.new(increments) }
+
     before(:each) do
       stub_storage
     end
 
-    it 'should update storage' do
-      Perf::Configuration.storage.should_receive(:increment).with(increments).exactly(1).times
+    it 'updates storage' do
+      expect(Perf::Configuration.storage).to receive(:increment).with(increments).once
 
       counter.start
     end
   end
 
-  context '#stop' do
+  describe '#stop' do
     before(:each) do
       stub_storage(:increment)
     end
 
-    it 'should not update storage' do
+    it 'does not update storage' do
       counter = active_counter
       stub_storage
 
@@ -43,12 +43,12 @@ describe Perf::HitsCounter do
     end
   end
 
-  context '#error' do
+  describe '#error' do
     before(:each) do
       stub_storage(:increment)
     end
 
-    it 'should not update storage' do
+    it 'does not update storage' do
       counter = active_counter
       stub_storage
 

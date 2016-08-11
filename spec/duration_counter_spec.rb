@@ -4,43 +4,43 @@ describe Perf::DurationCounter do
   let(:storage) { Perf::Storage::MemoryStorage.new }
 
   before(:each) do
-    Perf::Configuration.stub(:storage).and_return(storage)
+    allow(Perf::Configuration).to receive(:storage).and_return(storage)
   end
 
-  context 'interface' do
+  describe 'interface' do
     subject { Perf::DurationCounter }
 
-    it { should be_a_counter }
+    it { is_expected.to be_a_counter }
   end
 
-  context '#start' do
+  describe '#start' do
     let(:counter_name) { :duration_counter }
     let(:counter) { Perf::DurationCounter.new(counter_name) }
 
-    it 'should record start time' do
-      Time.should_receive(:now)
+    it 'records start time' do
+      expect(Time).to receive(:now).and_call_original
 
       counter.start
     end
   end
 
-  context '#stop' do
+  describe '#stop' do
     let(:counter_name) { :duration_counter }
     let(:counter) { Perf::DurationCounter.new(counter_name) }
 
     before(:each) do
-      Time.stub(:now).and_return(10, 20)
+      allow(Time).to receive(:now).and_return(10, 20)
       counter.start
     end
 
-    it 'should report duration to the storage' do
-      storage.should_receive(:increment).with(counter_name => 10000)
+    it 'reports duration to the storage' do
+      expect(storage).to receive(:increment).with(counter_name => 10000)
 
       counter.stop
     end
   end
 
-  context '#error' do
+  describe '#error' do
     let(:counter_name) { :duration_counter }
     let(:counter) { Perf::DurationCounter.new(counter_name) }
 
@@ -48,8 +48,8 @@ describe Perf::DurationCounter do
       counter.start
     end
 
-    it 'should not update storage' do
-      storage.should_not_receive(:increment)
+    it 'does not update storage' do
+      expect(storage).not_to receive(:increment)
       counter.error
     end
   end

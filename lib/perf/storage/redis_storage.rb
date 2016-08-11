@@ -92,6 +92,9 @@ module Perf
             block[redis]
           end
         end
+      rescue => ex
+        Configuration.logger.error("Perf redis failure: #{ex}")
+        :failed
       end
 
       def with_lock(&block)

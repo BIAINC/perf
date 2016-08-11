@@ -4,32 +4,32 @@ describe Perf::ThroughputCounter do
   let(:storage) { Perf::Storage::MemoryStorage.new }
 
   before(:each) do
-    Perf::Configuration.stub(:storage).and_return(storage)
+    allow(Perf::Configuration).to receive(:storage).and_return(storage)
   end
 
-  context 'interface' do
+  describe 'interface' do
     subject { Perf::ThroughputCounter }
 
-    it { should be_a_counter }
+    it { is_expected.to be_a_counter }
   end
 
-  context '#start' do
+  describe '#start' do
     let(:counter_name) { :throughput }
     let(:volume) { rand(100..1000) }
     let(:counter) { Perf::ThroughputCounter.new(counter_name => volume) }
 
-    it 'should record start time' do
-      Time.should_receive(:now).and_call_original
+    it 'records start time' do
+      expect(Time).to receive(:now).and_call_original
 
       counter.start
     end
   end
 
-  context '#stop' do
+  describe '#stop' do
     let(:counter_name) { :throughput }
 
     before(:each) do
-      Time.stub(:now).and_return(110, 120)
+      allow(Time).to receive(:now).and_return(110, 120)
     end
 
     context 'normal counter' do
@@ -40,8 +40,8 @@ describe Perf::ThroughputCounter do
         counter.start
       end
 
-      it 'should increment counters' do
-        storage.should_receive(:increment).with("#{counter_name}_count" => 1, "#{counter_name}_duration" => 10000, "#{counter_name}_volume" => volume)
+      it 'increments counters' do
+        expect(storage).to receive(:increment).with("#{counter_name}_count" => 1, "#{counter_name}_duration" => 10000, "#{counter_name}_volume" => volume)
 
         counter.stop
       end
@@ -55,15 +55,15 @@ describe Perf::ThroughputCounter do
         counter.start
       end
 
-      it 'should increment counters' do
-        storage.should_receive(:increment).with("#{counter_name}_count" => 1, "#{counter_name}_duration" => 10000, "#{counter_name}_volume" => volume.call)
+      it 'increments counters' do
+        expect(storage).to receive(:increment).with("#{counter_name}_count" => 1, "#{counter_name}_duration" => 10000, "#{counter_name}_volume" => volume.call)
 
         counter.stop
       end
     end
   end
 
-  context '#error' do
+  describe '#error' do
     let(:counter_name) { :throughput }
     let(:volume) { rand(100..1000) }
     let(:counter) { Perf::ThroughputCounter.new(counter_name => volume) }
@@ -72,8 +72,8 @@ describe Perf::ThroughputCounter do
       counter.start
     end
 
-    it 'should not increment counters' do
-      storage.should_not_receive(:increment)
+    it 'does not increment counters' do
+      expect(storage).not_to receive(:increment)
 
       counter.error
     end

@@ -1,63 +1,61 @@
 require 'spec_helper'
 
 describe Perf::FailuresCounter do
-  let(:type) { Perf::FailuresCounter }
   let(:increments) { {foo: 1, bar: 2} }
 
   def active_counter
-    counter = type.new(increments)
+    counter = described_class.new(increments)
     counter.start
     counter
   end
 
-  context 'interface' do
+  describe 'interface' do
     subject { Perf::FailuresCounter }
 
-    it {should be_a_counter }
+    it {is_expected.to be_a_counter }
   end
   
-  context '#start' do
-    let(:counter) { type.new(increments) }
+  describe '#start' do
+    let(:counter) { described_class.new(increments) }
 
     before(:each) do
       stub_storage
     end
 
-    it 'should not update storage' do
+    it 'does not update storage' do
       # Storage is mocked up with no methods. Calling it will result in an error
       expect { counter.start }.to_not raise_error
     end
   end
 
-  context '#stop' do
+  describe '#stop' do
     let(:counter) { active_counter }
 
     before(:each) do
       stub_storage
     end
 
-    it 'should not update storage' do
+    it 'does not update storage' do
       expect { counter.stop }.to_not raise_error
     end
   end
 
-  context '#error' do
+  describe '#error' do
     let(:counter) { active_counter }
 
     before(:each) do
       stub_storage
     end
 
-    it 'should update storage' do
-      Perf::Configuration.storage.should_receive(:increment).with(increments).exactly(1).times
-
+    it 'updates storage' do
+      expect(Perf::Configuration.storage).to receive(:increment).with(increments).once
       counter.error
     end
 
-    it 'should execute lambdas' do
-      c = Perf::FailuresCounter.new({foo: 1, bar: ->{2}})
+    it 'executes lambdas' do
+      c = described_class.new({foo: 1, bar: ->{2}})
       c.start
-      Perf::Configuration.storage.should_receive(:increment).with(foo: 1, bar: 2).exactly(1).times
+      expect(Perf::Configuration.storage).to receive(:increment).with(foo: 1, bar: 2).once
 
       c.error
     end
