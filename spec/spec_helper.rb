@@ -2,12 +2,11 @@ require 'simplecov'
 SimpleCov.start
 
 require 'perf'
-require 'perf/configuration'
 
 def stub_storage(*methods)
   s = double('storage')
-  methods.each{|m| s.stub(m)}
-  Perf::Configuration.stub(:storage).and_return(s)
+  methods.each{|m| allow(s).to receive(m)}
+  allow(Perf::Configuration).to receive(:storage).and_return(s)
   s
 end
 

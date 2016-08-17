@@ -1,38 +1,37 @@
 require 'spec_helper'
-require 'uuid'
 
 describe Perf::Data do 
   let(:storage) { mock_storage }
 
   before(:each) do
-    Perf::Configuration.stub(:storage).and_return(storage)
+    allow(Perf::Configuration).to receive(:storage).and_return(storage)
   end
 
   def mock_storage
-    s = double('storage')
-    s.stub(:all_counters)
-    s.stub(:reset)
-    s
+    double('storage').tap do |s|
+      allow(s).to receive(:all_counters)
+      allow(s).to receive(:reset)
+    end
   end
 
-  context '::get' do
-    it 'should redirect call to the storage' do
-      storage.should_receive(:all_counters)
+  describe '.get' do
+    it 'redirects call to the storage' do
+      expect(storage).to receive(:all_counters)
 
       Perf::Data.get
     end
 
-    it 'should return value obtained from the storage' do
-      expected = UUID.generate.to_s
-      storage.stub(:all_counters).and_return(expected)
+    it 'returns value obtained from the storage' do
+      expected = SecureRandom.uuid
+      allow(storage).to receive(:all_counters).and_return(expected)
 
-      Perf::Data.get.should eql(expected)
+      expect(Perf::Data.get).to eq(expected)
     end
   end
 
-  context '::reset' do
-    it 'should redirect call to the storage' do
-      storage.should_receive(:reset)
+  describe '.reset' do
+    it 'redirects call to the storage' do
+      expect(storage).to receive(:reset)
 
       Perf::Data.reset
     end
